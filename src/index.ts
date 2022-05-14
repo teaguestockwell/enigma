@@ -1,57 +1,76 @@
-// ascii a-z
-export const charCodes = [97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122] as const
-const getCharCodes = () => Array.from({length: charCodes.length}, (_, i) => charCodes[i])
-export type CharCode = typeof charCodes[number]
+const rotor = {
+  'a': 'e',
+  'b': 'k',
+  'c': 'm',
+  'd': 'f',
+  'e': 'l',
+  'f': 'g',
+  'g': 'd',
+  'h': 'q',
+  'i': 'v',
+  'j': 'z',
+  'k': 'n',
+  'l': 't',
+  'm': 'o',
+  'n': 'w',
+  'o': 'y',
+  'p': 'h',
+  'q': 'x',
+  'r': 'u',
+  's': 's',
+  't': 'p',
+  'u': 'a',
+  'v': 'i',
+  'w': 'b',
+  'x': 'r',
+  'y': 'c',
+  'z': 'j',
+} as const
 
-export type Rotor = {
-  // y: input, x: output
-  connections: Record<CharCode,CharCode>;
-  topDeadCenter: CharCode;
+type Char = keyof typeof rotor
+
+type Enigma = {
+  state: Char[],
+  rotors: typeof rotor[]
+  encode: (input: string) => string
 }
 
-export const getPermutations = <T>(arr: T[], limit?: number): T[][] => {
-  const result: T[][] = [];
+const validateChars = (input: string) => {
+  if (input.split('').some(c => c.charAt(0) < 'a'.charAt(0) || c.charAt(0) > 'z'.charAt(0))) {
+    throw new Error('cypher must be a through z')
+  }
+}
 
-  const permute = (arr: T[], m = [] as T[]) => {
-    if (arr.length === 0) {
-      result.push(m)
-      return
-    }
-
-    for (let i = 0; i < arr.length; i++) {
-      const curr = arr.slice();
-      const next = curr.splice(i, 1);
-      if (limit !== undefined && result.length !== limit) {
-        permute(curr.slice(), m.concat(next))
+export const getEnigma = (cypher: string): Enigma => {
+  validateChars(cypher)
+  const enigma: Enigma = {
+    state: cypher.split('') as Char[],
+    rotors: Array.from({length: cypher.length}, (_, i) => ({...rotor, topDeadCenter: cypher.charCodeAt(i)})),
+    encode: (input: string) => {
+      validateChars(input)
+      const {rotors, state} = enigma
+      let res = ''
+  
+      const spin = (topDeadCenter: string) => {
+        return topDeadCenter.charCodeAt(0) === 122 ? 'a' : String.fromCharCode(topDeadCenter.charCodeAt(0) + 1) as Char
       }
+  
+      for (let i = 0; i < input.length; i++) {
+        const char = input[i] as Char
+        const firstKey = rotors[0][state[0]]
+        let encoded = state[0]
+        state[0] = spin(state[0])
+        for (let j = 1; j < rotors.length; j++) {
+          if (state[j - 1] === 'a') {
+            state[j] = spin(state[j])
+          }
+          encoded = rotors[j][encoded]
+          console.log({ encoded, char })
+        }
+        res += encoded
+      }
+      return res
     }
   }
-
- permute(arr)
-
- return result;
+  return enigma
 }
-
-const getHashCode = (s: string, range: number) => {
-  let acc = 0;
-  for(const c of s) {
-    acc += c.charCodeAt(0)
-  }
-  return Math.abs(acc % range)
-}
-
-const connectionPermutationsKeys = getPermutations(getCharCodes(), 100 * 1000)
-const connectionPermutationsValues = getPermutations(getCharCodes().reverse(), 100 * 1000)
-
-export const getRotorConnections = (hash: string): Record<CharCode,CharCode> => {
-  const keysIndex = getHashCode(hash, Math.floor(connectionPermutationsKeys.length / 4))
-  const valuesIndex = keysIndex * 4
-  const keys = connectionPermutationsKeys[keysIndex]
-  const values = connectionPermutationsValues[valuesIndex]
-  return keys.reduce((acc, key, i) => {
-    acc[key] = values[i]
-    return acc
-  }, {} as Record<CharCode,CharCode>)
-}
-
-export const getRotors = (hashes: string[]) => hashes.map(getRotorConnections)
