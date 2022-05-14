@@ -1,15 +1,3 @@
-const caesarShift = (char: string, amount: number):string => {
-  if (!char.length || char.length > 1) {
-    throw new Error('Invalid cesar shift');
-  }
-
-  if (amount < 0) {
-    return caesarShift(char, amount + 26)
-  }
-
-  return String.fromCharCode(((char.charCodeAt(0) - 97 + amount) % 26) + 97)
-}
-
 export const getEnigma = (cypher: string) => {
   const enigma = {
     state: cypher.split(''),
@@ -17,19 +5,24 @@ export const getEnigma = (cypher: string) => {
       const { state } = enigma
       let res = ''
 
-      const spin = (s: string) => s === 'z' ? 'a' : String.fromCharCode(s.charCodeAt(0) + 1)
-      
-      for (let charI = 0; charI < input.length; charI++) {
-        let encoded = input[charI]
-        state[0] = spin(state[0].charAt(0))
-        for (let rotorI = 1; rotorI < state.length; rotorI++) {
-          if (state[rotorI - 1] === 'a') {
-            state[rotorI] = spin(state[rotorI])
+      for (const char of input) {
+        let encoded = char
+
+        for (let stateI = 0; stateI < state.length; stateI++) {
+          const next = state[stateI] === 'z' ? 'a' : String.fromCharCode(state[stateI].charCodeAt(0) + 1)
+          state[stateI] = next
+          if (next !== 'a') {
+            break
           }
-          encoded = caesarShift(encoded, state[rotorI].charCodeAt(0) + 13)
         }
+
+        for (let rotorI = 0; rotorI < state.length; rotorI++) {
+          encoded = String.fromCharCode(((encoded.charCodeAt(0) - 97 + state[rotorI].charCodeAt(0) + 7) % 26) + 97)
+        }
+
         res += encoded
       }
+
       return res
     }
   }
