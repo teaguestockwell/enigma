@@ -131,8 +131,8 @@ it('spin rotors after each char encoding', () => {
 
 it.only('encodes and decodes 1 char', () => {
   const config = {
-    initialCypher: [0, 0, 0],
-    rotorOrder: [0, 1, 2],
+    initialCypher: [0, 0, 0, 0],
+    rotorOrder: [0, 1, 2, 3],
     verbose: true
   };
   const encoder = getEnigma(config);

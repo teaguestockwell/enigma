@@ -12,14 +12,14 @@ export const charToCode = (char: string) => {
     throw new Error(`${char} is not a lowercase letter`);
   }
   return code - 97;
-}
+};
 
 export const codeToChar = (code: number) => {
   if (code < 0 || code > 25) {
     throw new Error(`${code} is not a valid code`);
   }
   return String.fromCharCode(code + 97);
-}
+};
 
 export const getRandomRotor = () => {
   const shifts = Array.from({ length: 26 }, (_, i) => i);
@@ -247,9 +247,9 @@ export const getEnigma = (config: EnigmaConfig) => {
       let res = '';
 
       for (const c of s) {
-        let coded: undefined | number
+        let coded: undefined | number;
         counter++;
-        logs.push(`pressed ${c}`)
+        logs.push(`pressed ${c}`);
 
         // dont spin the reflector
         for (let i = 0; i < rotors.length - 1; i++) {
@@ -261,25 +261,26 @@ export const getEnigma = (config: EnigmaConfig) => {
 
         for (let i = 0; i < rotors.length - 1; i++) {
           coded = rotors[i][coded ?? charToCode(c)][1];
-          logs.push(`down rotor ${i}: ${coded}`);
+          logs.push(`rotor ${i}: ${coded}`);
         }
 
         // reflector
         coded = rotors[rotors.length - 1][coded!][1];
+        logs.push(`rotor ${rotors.length - 1} reflected: ${coded}`);
 
         for (let i = rotors.length - 2; i >= 0; i--) {
-          coded = rotors[i].find(set => set[0] === coded!)?.[1];
-          logs.push(`up rotor ${i}: ${coded}`);
+          coded = rotors[i][coded!][1];
+          logs.push(`rotor ${i}: ${coded}`);
         }
 
         res += codeToChar(coded!);
-        logs.push(`illuminated ${res[res.length - 1]}`)
+        logs.push(`illuminated ${res[res.length - 1]}`);
       }
 
       if (config.verbose) {
-        console.log(logs.join('\n'))
-        console.log(rotors)
-      };
+        console.log(logs.join('\n'));
+        console.log(rotors);
+      }
       return res;
     },
   };
