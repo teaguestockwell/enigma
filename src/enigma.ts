@@ -1,5 +1,3 @@
-const log = (..._args: any[]) => ''
-
 /**
  * a circular array of connections
  * connection[0] is the input
@@ -8,19 +6,34 @@ const log = (..._args: any[]) => ''
  */
 export type Rotor = [number, number][];
 
-export const charToCode = (char: string) => char.charCodeAt(0) - 97;
+export const charToCode = (char: string) => {
+  const code = char.charCodeAt(0);
+  if (code < 97 || code > 122) {
+    throw new Error(`${char} is not a lowercase letter`);
+  }
+  return code - 97;
+}
 
-export const codeToChar = (code: number) => String.fromCharCode(code + 97);
+export const codeToChar = (code: number) => {
+  if (code < 0 || code > 25) {
+    throw new Error(`${code} is not a valid code`);
+  }
+  return String.fromCharCode(code + 97);
+}
 
 export const getRandomRotor = () => {
-  const input = Array.from({ length: 26 }, (_, i) => i);
-  const out = Array.from({ length: 26 }, (_, i) => i);
+  const shifts = Array.from({ length: 26 }, (_, i) => i);
   const sets: [number, number][] = [];
 
-  while (input.length) {
-    const i = input.splice(Math.floor(input.length * Math.random()), 1)[0];
-    const o = out.splice(Math.floor(out.length * Math.random()), 1)[0];
-    sets.push([i, o]);
+  while (shifts.length) {
+    const setIndex = 26 - shifts.length;
+    const by = Math.floor(Math.random() * shifts.length);
+
+    if (shifts[by] === setIndex) {
+      continue;
+    }
+
+    sets.push([setIndex, shifts.splice(by, 1)[0]]);
   }
 
   return sets;
@@ -28,144 +41,144 @@ export const getRandomRotor = () => {
 
 export const getRotors = (): Rotor[] => [
   [
-    [1, 16],
-    [7, 6],
-    [8, 23],
-    [18, 14],
-    [0, 8],
-    [5, 15],
-    [22, 2],
-    [16, 25],
-    [17, 9],
-    [23, 17],
-    [13, 10],
-    [24, 20],
-    [19, 4],
-    [12, 12],
-    [14, 1],
-    [3, 7],
-    [4, 22],
-    [9, 18],
-    [11, 3],
-    [2, 19],
-    [25, 21],
-    [15, 5],
-    [6, 24],
-    [21, 11],
+    [0, 21],
+    [1, 18],
+    [2, 5],
+    [3, 12],
+    [4, 9],
+    [5, 17],
+    [6, 10],
+    [7, 11],
+    [8, 0],
+    [9, 15],
     [10, 13],
-    [20, 0],
+    [11, 14],
+    [12, 2],
+    [13, 22],
+    [14, 1],
+    [15, 20],
+    [16, 4],
+    [17, 3],
+    [18, 8],
+    [19, 23],
+    [20, 16],
+    [21, 24],
+    [22, 19],
+    [23, 25],
+    [24, 6],
+    [25, 7],
   ],
   [
-    [13, 24],
-    [6, 4],
-    [25, 6],
-    [24, 18],
-    [17, 15],
+    [0, 15],
+    [1, 24],
+    [2, 6],
+    [3, 25],
     [4, 10],
-    [21, 17],
-    [19, 16],
-    [10, 21],
-    [15, 1],
-    [5, 23],
-    [20, 2],
-    [14, 5],
-    [0, 19],
-    [2, 9],
-    [22, 12],
-    [11, 20],
+    [5, 18],
+    [6, 16],
+    [7, 17],
     [8, 22],
-    [9, 11],
-    [18, 8],
-    [23, 13],
-    [16, 25],
+    [9, 4],
+    [10, 7],
+    [11, 20],
     [12, 0],
-    [3, 7],
-    [1, 3],
-    [7, 14],
-  ],
-  [
-    [20, 8],
-    [0, 5],
-    [12, 1],
-    [13, 17],
-    [16, 12],
-    [22, 24],
-    [10, 22],
-    [4, 3],
-    [24, 15],
-    [8, 16],
+    [13, 8],
+    [14, 5],
+    [15, 1],
+    [16, 14],
+    [17, 11],
+    [18, 3],
     [19, 21],
-    [2, 14],
-    [17, 2],
-    [15, 4],
-    [5, 23],
-    [6, 11],
-    [1, 0],
-    [3, 10],
-    [7, 25],
-    [14, 7],
-    [25, 13],
-    [18, 20],
-    [23, 6],
-    [21, 19],
-    [9, 9],
-    [11, 18],
+    [20, 13],
+    [21, 12],
+    [22, 19],
+    [23, 2],
+    [24, 23],
+    [25, 9],
   ],
   [
-    [17, 5],
-    [3, 13],
-    [0, 20],
-    [9, 16],
-    [8, 10],
-    [19, 12],
-    [5, 24],
-    [20, 4],
-    [16, 2],
-    [12, 0],
-    [10, 22],
-    [6, 7],
-    [22, 23],
-    [2, 1],
-    [13, 6],
-    [21, 18],
-    [18, 9],
-    [11, 8],
-    [15, 21],
-    [7, 19],
-    [1, 3],
-    [4, 25],
-    [25, 14],
-    [14, 11],
-    [23, 15],
-    [24, 17],
-  ],
-  [
-    [20, 17],
-    [12, 23],
-    [1, 14],
-    [23, 15],
-    [25, 16],
-    [7, 0],
-    [19, 5],
-    [9, 6],
-    [18, 8],
-    [8, 18],
-    [21, 9],
-    [6, 1],
-    [2, 10],
-    [10, 3],
-    [14, 21],
-    [0, 2],
-    [11, 7],
-    [13, 13],
-    [15, 11],
-    [5, 19],
-    [16, 25],
-    [4, 22],
-    [3, 4],
-    [22, 24],
-    [24, 20],
+    [0, 15],
+    [1, 6],
+    [2, 7],
+    [3, 14],
+    [4, 10],
+    [5, 3],
+    [6, 25],
+    [7, 18],
+    [8, 23],
+    [9, 1],
+    [10, 11],
+    [11, 5],
+    [12, 19],
+    [13, 8],
+    [14, 2],
+    [15, 9],
+    [16, 21],
     [17, 12],
+    [18, 20],
+    [19, 0],
+    [20, 13],
+    [21, 4],
+    [22, 17],
+    [23, 16],
+    [24, 22],
+    [25, 24],
+  ],
+  [
+    [0, 13],
+    [1, 6],
+    [2, 25],
+    [3, 14],
+    [4, 1],
+    [5, 11],
+    [6, 22],
+    [7, 2],
+    [8, 10],
+    [9, 4],
+    [10, 16],
+    [11, 9],
+    [12, 24],
+    [13, 3],
+    [14, 5],
+    [15, 7],
+    [16, 23],
+    [17, 21],
+    [18, 0],
+    [19, 12],
+    [20, 19],
+    [21, 18],
+    [22, 17],
+    [23, 8],
+    [24, 20],
+    [25, 15],
+  ],
+  [
+    [0, 15],
+    [1, 4],
+    [2, 9],
+    [3, 13],
+    [4, 5],
+    [5, 7],
+    [6, 17],
+    [7, 25],
+    [8, 21],
+    [9, 1],
+    [10, 14],
+    [11, 2],
+    [12, 16],
+    [13, 12],
+    [14, 19],
+    [15, 24],
+    [16, 20],
+    [17, 22],
+    [18, 23],
+    [19, 11],
+    [20, 0],
+    [21, 8],
+    [22, 10],
+    [23, 6],
+    [24, 3],
+    [25, 18],
   ],
 ];
 
@@ -220,46 +233,53 @@ export type EnigmaConfig = {
   initialCypher: number[];
   rotorOrder: number[];
   rotors?: Rotor[];
+  verbose?: boolean;
 };
 
 export const getEnigma = (config: EnigmaConfig) => {
   const rotors = config.rotors ?? getSelectedRotors(config.rotorOrder);
   setCypher(rotors, config.initialCypher);
   let counter = 0;
+  const logs: any[] = [];
 
   const e = {
     code: (s: string) => {
       let res = '';
 
       for (const c of s) {
+        let coded: undefined | number
         counter++;
-        spin(rotors[0]);
-        log({ rotors, counter });
-        for (let i = 1; i < rotors.length - 1; i++) {
-          if (counter % rotors[0].length ** i === 0) {
+        logs.push(`pressed ${c}`)
+
+        // dont spin the reflector
+        for (let i = 0; i < rotors.length - 1; i++) {
+          if (i === 0 || counter % rotors[0].length ** i === 0) {
             spin(rotors[i]);
-            log({ counter, router: i });
+            logs.push(`spun rotor ${i}`);
           }
         }
 
-        let coded = rotors[0][charToCode(c)][1];
-
-        for (let i = 1; i < rotors.length; i++) {
-          log({coded})
-          coded = rotors[i][coded][1];
+        for (let i = 0; i < rotors.length - 1; i++) {
+          coded = rotors[i][coded ?? charToCode(c)][1];
+          logs.push(`down rotor ${i}: ${coded}`);
         }
+
+        // reflector
+        coded = rotors[rotors.length - 1][coded!][1];
 
         for (let i = rotors.length - 2; i >= 0; i--) {
-          log({coded})
-          coded = rotors[i][coded][1];
-
-          if (i == 0) {
-            log({coded})
-          }
+          coded = rotors[i].find(set => set[0] === coded!)?.[1];
+          logs.push(`up rotor ${i}: ${coded}`);
         }
 
-        res += codeToChar(coded);
+        res += codeToChar(coded!);
+        logs.push(`illuminated ${res[res.length - 1]}`)
       }
+
+      if (config.verbose) {
+        console.log(logs.join('\n'))
+        console.log(rotors)
+      };
       return res;
     },
   };

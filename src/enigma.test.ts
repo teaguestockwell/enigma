@@ -11,6 +11,7 @@ import {
   charToCode,
   codeToChar,
   getEnigma,
+  getRandomRotor,
 } from './enigma';
 
 const getSmRotor = (): Rotor => [
@@ -43,6 +44,20 @@ const getSmRotors = () => [
     [2, 0],
   ],
 ];
+
+it('makes valid rotors', () => {
+  const r = getRandomRotor()
+  const seenShift = new Set<number>();
+  const seenIndex = new Set<number>();
+  for (const [i, shiftBy] of r) {
+    // a rotor may never encode fn(x) => x, because after it advances, it will break the cyphers symmetry
+    expect(i).not.toBe(shiftBy);
+    seenShift.add(shiftBy)
+    seenIndex.add(i)
+  }
+
+  // console.log(new Array(5).fill(0).map(getRandomRotor))
+})
 
 it('gets char codes', () => {
   expect(charToCode('a')).toBe(0);
@@ -114,35 +129,14 @@ it('spin rotors after each char encoding', () => {
   expect(enigma.code('a')).not.toBe(enigma.code('a'));
 });
 
-it('encodes and decodes 1 char 3 rotors', () => {
+it.only('encodes and decodes 1 char', () => {
   const config = {
     initialCypher: [0, 0, 0],
     rotorOrder: [0, 1, 2],
+    verbose: true
   };
   const encoder = getEnigma(config);
   const decoder = getEnigma(config);
 
-  expect(decoder.code(encoder.code('a'))).toBe('a');
-});
-
-it('encodes and decodes 1 char 5 rotors', () => {
-  const config = {
-    initialCypher: [1, 25, 0, 20, 2],
-    rotorOrder: [4, 3, 1, 2, 0],
-  };
-  const encoder = getEnigma(config);
-  const decoder = getEnigma(config);
-
-  expect(decoder.code(encoder.code('a'))).toBe('a');
-});
-
-it('encodes and decodes many chars', () => {
-  const config = {
-    initialCypher: [1, 2, 3, 4],
-    rotorOrder: [0, 1, 2, 3],
-  };
-  const encoder = getEnigma(config);
-  const decoder = getEnigma(config);
-
-  expect(decoder.code(encoder.code('a'.repeat(1)))).toBe('a'.repeat(1));
+  expect(decoder.code(encoder.code('z'))).toBe('z');
 });
