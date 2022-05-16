@@ -92,7 +92,7 @@ export const connect = (options: ConnectOptions) => {
         console.log({ wires, location, offset });
       return w.output === location;
     })!.input - offset;
-  const shifted = unShifted < 0 ? unShifted + wires.length + 1 : unShifted;
+  const shifted = unShifted < 0 ? unShifted + wires.length : unShifted;
   return shifted;
 };
 

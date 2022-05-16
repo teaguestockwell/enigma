@@ -39,19 +39,20 @@ it('resolves connections', () => {
   expect(backwardResult).toBe(start)
 })
 
-it.each(Array.from({length: 26}, (_, i) => i))('resolves connection %i', (i) => {
-  const rotor = getRandomRotor()
-  rotor.offset = Math.floor(Math.random() * 26)
+const length = 5
+const rot = getRandomRotor(length)
+it.each(Array.from({length}, (_, i) => i))('resolves connection %i', (i) => {
+  rot.offset = Math.floor(Math.random() * length)
   
   const forwardResult = connect({
     direction: 'normal',
     location: i,
-    rotor,
+    rotor: rot,
   })
   const backwardResult = connect({
     direction: 'reflected',
     location: forwardResult,
-    rotor,
+    rotor: rot,
   })
 
   expect(backwardResult).toBe(i)

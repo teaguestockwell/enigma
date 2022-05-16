@@ -30,7 +30,7 @@ export const getEnigma = (config: EnigmaConfig) => {
         }
 
         for (let i = 0; i < rotors.length; i++) {
-          connect({
+          coded = connect({
             direction: 'normal',
             location: coded ?? encodeChar(c),
             rotor: rotors[i],
@@ -39,7 +39,7 @@ export const getEnigma = (config: EnigmaConfig) => {
         }
 
         for (let i = rotors.length - 2; i >= 0; i--) {
-          connect({
+          coded = connect({
             direction: 'reflected',
             location: coded!,
             rotor: rotors[i],

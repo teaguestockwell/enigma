@@ -5,7 +5,9 @@ it('spin rotors after each char encoding', () => {
     initialCypher: [0, 0, 0],
     rotorOrder: [0, 1, 2],
   });
-  expect(enigma.code('a')).not.toBe(enigma.code('a'));
+  const res0 = enigma.code('a');
+  const res1 = enigma.code('a');
+  expect(res0).not.toBe(res1);
 });
 
 it('encodes', () => {
