@@ -72,7 +72,7 @@ export const connect = (options: ConnectOptions) => {
       output < 0 ||
       output >= wires.length
     ) {
-      console.log('invalid wire', w);
+      // console.log('invalid wire', w);
     }
   }
 
@@ -87,11 +87,7 @@ export const connect = (options: ConnectOptions) => {
   }
 
   const unShifted =
-    wires.find(w => {
-      if (location > 25 || location < 0)
-        console.log({ wires, location, offset });
-      return w.output === location;
-    })!.input - offset;
+    wires.find(w => w.output === location)!.input - offset + 1;
   const shifted = unShifted < 0 ? unShifted + wires.length : unShifted;
   return shifted;
 };

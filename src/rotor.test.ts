@@ -39,23 +39,30 @@ it('resolves connections', () => {
   expect(backwardResult).toBe(start)
 })
 
-const length = 5
-const rot = getRandomRotor(length)
-it.each(Array.from({length}, (_, i) => i))('resolves connection %i', (i) => {
-  rot.offset = Math.floor(Math.random() * length)
-  
+const cases: [number, number, Rotor][] = []
+
+for (let location = 0; location < 26; location++) {
+  for (const rotor of getRotors()) {
+    for (let offset = 0; offset < rotor.wires.length - 1; offset++) {
+      cases.push([location, offset, rotor])
+    }
+  }
+}
+it.each(cases)('resolves location %i at offset %i rotor x', (location, offset, rotor) => {
+  rotor.offset = offset
+
   const forwardResult = connect({
     direction: 'normal',
-    location: i,
-    rotor: rot,
+    location,
+    rotor,
   })
   const backwardResult = connect({
     direction: 'reflected',
     location: forwardResult,
-    rotor: rot,
-  })
-
-  expect(backwardResult).toBe(i)
+    rotor,
+  }) 
+  
+  expect(backwardResult).toBe(location)
 })
 
 it('spins rotor', () => {
