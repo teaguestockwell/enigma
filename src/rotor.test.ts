@@ -1,4 +1,5 @@
 import {
+  connect,
   getRandomRotor,
   getRotors,
   getSelectedRotors,
@@ -8,41 +9,90 @@ import {
   spin,
 } from './rotor';
 
-const getSmRotor = (): Rotor => [
-  { id: 0, input: 0, output: 3 },
-  { id: 1, input: 1, output: 4 },
-  { id: 2, input: 2, output: 2 },
-  { id: 3, input: 3, output: 0 },
-];
+const getSmRotor = (): Rotor => ({
+  id: 1,
+  offset: 0,
+  wires: [
+    { input: 0, output: 3 },
+    { input: 1, output: 4 },
+    { input: 2, output: 2 },
+    { input: 3, output: 0 },
+  ],
+});
+
+it('resolves connections', () => {
+  const rotor = getSmRotor()
+  rotor.offset = 2
+  const start = 0
+  
+  const forwardResult = connect({
+    direction: 'normal',
+    location: 0,
+    rotor,
+  })
+  const backwardResult = connect({
+    direction: 'reflected',
+    location: forwardResult,
+    rotor,
+  })
+
+  expect(backwardResult).toBe(start)
+})
+
+it.each(Array.from({length: 26}, (_, i) => i))('resolves connection %i', (i) => {
+  const rotor = getRandomRotor()
+  rotor.offset = Math.floor(Math.random() * 26)
+  
+  const forwardResult = connect({
+    direction: 'normal',
+    location: i,
+    rotor,
+  })
+  const backwardResult = connect({
+    direction: 'reflected',
+    location: forwardResult,
+    rotor,
+  })
+
+  expect(backwardResult).toBe(i)
+})
 
 it('spins rotor', () => {
   const r = getSmRotor();
   spin(r);
-  expect(r).toEqual([
-    { id: 1, input: 1, output: 4 },
-    { id: 2, input: 2, output: 2 },
-    { id: 3, input: 3, output: 0 },
-    { id: 0, input: 0, output: 3 },
-  ]);
-});
+  expect(r).toEqual({
+    id: 1,
+    offset: 1,
+    wires: [
+      { input: 0, output: 3 },
+      { input: 1, output: 4 },
+      { input: 2, output: 2 },
+      { input: 3, output: 0 },
+    ],
+  });
+})
 
 it('seeks rotor position', () => {
   const r = getSmRotor();
   seek(3, r);
-  expect(r).toEqual([
-    { id: 3, input: 3, output: 0 },
-    { id: 0, input: 0, output: 3 },
-    { id: 1, input: 1, output: 4 },
-    { id: 2, input: 2, output: 2 },
-  ])
-});
+  expect(r).toEqual({
+    id: 1,
+    offset: 3,
+    wires: [
+      { input: 0, output: 3 },
+      { input: 1, output: 4 },
+      { input: 2, output: 2 },
+      { input: 3, output: 0 },
+    ],
+  });
+})
 
 it('sets the cypher state on the rotors', () => {
   const all = getRotors();
   const cypher = Array.from({ length: all.length }, () => 0);
   setCypher(all, cypher);
-  for (const r of all) {
-    expect(r[0].id).toBe(0);
+  for (let i = 0; i < all.length; i++) {
+    expect(all[i].offset).toBe(cypher[i]);
   }
 });
 
@@ -55,25 +105,26 @@ it('selects the correct rotors', () => {
 });
 
 it('makes valid rotors', () => {
-  const r = getRandomRotor();
-  const seenIds = new Set<number>();
+  const r = getRandomRotor(26);
   const seenInputs = new Set<number>();
   const seenOutputs = new Set<number>();
 
-  for (const wire of r) {
+  expect(r.wires.length).toBe(26);
+
+  for (const wire of r.wires) {
     // a rotor may never encode fn(x) => x,
-    // because after it advances, 
+    // because after it advances,
     // it will break the cyphers symmetry
     expect(wire.input).not.toBe(wire.output);
-
-    expect(seenIds.has(wire.id)).toBe(false);
     expect(seenInputs.has(wire.input)).toBe(false);
     expect(seenOutputs.has(wire.output)).toBe(false);
 
-    seenIds.add(wire.id);
     seenInputs.add(wire.input);
     seenOutputs.add(wire.output);
   }
 
-  // console.log(new Array(5).fill(0).map(getRandomRotor));
+  // new Array(5).fill(0).forEach(() => {
+  //   const r = getRandomRotor(26);
+  //   console.log(r)
+  // })
 });

@@ -1,43 +1,44 @@
-export type Rotor = {id: number, input: number, output: number}[];
+type Wire = { input: number; output: number };
+
+export type Rotor = { wires: Wire[]; offset: number; id: number };
 
 export const getRandomRotor = (chars = 26): Rotor => {
-  const inputs = Array.from({ length: 26 }, (_, i) => i);
   const outputs = Array.from({ length: 26 }, (_, i) => i);
-  let id = 0;
-  const rotor: Rotor = [];
+  const rotor: Rotor = {
+    id: Date.now(),
+    offset: 0,
+    wires: [],
+  };
+  let input = 0;
 
-  while (id !== chars) {
-    const inputIdx = Math.floor(Math.random() * inputs.length)
-    const outputIdx = Math.floor(Math.random() * outputs.length)
+  while (input !== chars) {
+    const i = Math.floor(Math.random() * outputs.length);
 
-    if (inputs[inputIdx] === outputs[outputIdx]) continue
+    if (input === outputs[i]) continue;
 
-    rotor.push({
-      id: id,
-      input: inputs.splice(inputIdx, 1)[0],
-      output: outputs.splice(outputIdx, 1)[0],
-    })
-    id++
+    rotor.wires.push({
+      input,
+      output: outputs.splice(i, 1)[0],
+    });
+
+    input++;
   }
 
-  return rotor
+  return rotor;
 };
 
 /**
  * shift the rotor left
  */
- export const spin = (rotor: Rotor) => {
-  const temp = rotor.shift() as Rotor[number];
-  rotor.push(temp);
+export const spin = (rotor: Rotor) => {
+  rotor.offset = rotor.offset === rotor.wires.length - 1 ? 0 : rotor.offset + 1;
 };
 
 /**
  * spin the rotor to set a char of the cypher
  */
 export const seek = (tar: number, rotor: Rotor) => {
-  while (rotor[0].id !== tar) {
-    spin(rotor);
-  }
+  rotor.offset = tar;
 };
 
 export const setCypher = (rotors: Rotor[], cypher: number[]) => {
@@ -48,6 +49,51 @@ export const setCypher = (rotors: Rotor[], cypher: number[]) => {
   for (let i = 0; i < cypher.length; i++) {
     seek(cypher[i], rotors[i]);
   }
+};
+
+export type ConnectOptions = {
+  direction: 'normal' | 'reflected';
+  location: number;
+  rotor: Rotor;
+};
+
+export const connect = (options: ConnectOptions) => {
+  const {
+    direction,
+    location,
+    rotor: { offset, wires },
+  } = options;
+
+  for (const w of wires) {
+    const { input, output } = w;
+    if (
+      input < 0 ||
+      input >= wires.length ||
+      output < 0 ||
+      output >= wires.length
+    ) {
+      console.log('invalid wire', w);
+    }
+  }
+
+  if (direction === 'normal') {
+    return wires.find(w => {
+      const sum = location + offset;
+      const tar = Math.abs(
+        sum >= wires.length - 1 ? (sum % wires.length) - 1 : sum
+      );
+      return tar === w.input;
+    })!.output;
+  }
+
+  const unShifted =
+    wires.find(w => {
+      if (location > 25 || location < 0)
+        console.log({ wires, location, offset });
+      return w.output === location;
+    })!.input - offset;
+  const shifted = unShifted < 0 ? unShifted + wires.length + 1 : unShifted;
+  return shifted;
 };
 
 /**
@@ -62,144 +108,164 @@ export const getSelectedRotors = (rotorOrder: number[]) => {
 };
 
 export const getRotors = (): Rotor[] => [
-  [
-    { id: 0, input: 1, output: 13 },
-    { id: 1, input: 6, output: 7 },
-    { id: 2, input: 5, output: 4 },
-    { id: 3, input: 14, output: 10 },
-    { id: 4, input: 8, output: 3 },
-    { id: 5, input: 9, output: 17 },
-    { id: 6, input: 10, output: 14 },
-    { id: 7, input: 15, output: 22 },
-    { id: 8, input: 7, output: 23 },
-    { id: 9, input: 4, output: 15 },
-    { id: 10, input: 21, output: 6 },
-    { id: 11, input: 23, output: 11 },
-    { id: 12, input: 3, output: 8 },
-    { id: 13, input: 22, output: 20 },
-    { id: 14, input: 0, output: 16 },
-    { id: 15, input: 17, output: 24 },
-    { id: 16, input: 2, output: 18 },
-    { id: 17, input: 19, output: 2 },
-    { id: 18, input: 16, output: 19 },
-    { id: 19, input: 18, output: 12 },
-    { id: 20, input: 24, output: 9 },
-    { id: 21, input: 13, output: 5 },
-    { id: 22, input: 25, output: 1 },
-    { id: 23, input: 12, output: 21 },
-    { id: 24, input: 20, output: 25 },
-    { id: 25, input: 11, output: 0 }
-  ],
-  [
-    { id: 0, input: 3, output: 0 },
-    { id: 1, input: 0, output: 8 },
-    { id: 2, input: 7, output: 22 },
-    { id: 3, input: 10, output: 23 },
-    { id: 4, input: 21, output: 19 },
-    { id: 5, input: 1, output: 17 },
-    { id: 6, input: 15, output: 14 },
-    { id: 7, input: 22, output: 5 },
-    { id: 8, input: 16, output: 24 },
-    { id: 9, input: 6, output: 15 },
-    { id: 10, input: 5, output: 10 },
-    { id: 11, input: 9, output: 3 },
-    { id: 12, input: 20, output: 21 },
-    { id: 13, input: 11, output: 9 },
-    { id: 14, input: 8, output: 25 },
-    { id: 15, input: 12, output: 18 },
-    { id: 16, input: 13, output: 4 },
-    { id: 17, input: 23, output: 20 },
-    { id: 18, input: 17, output: 1 },
-    { id: 19, input: 25, output: 7 },
-    { id: 20, input: 19, output: 11 },
-    { id: 21, input: 4, output: 6 },
-    { id: 22, input: 2, output: 13 },
-    { id: 23, input: 24, output: 12 },
-    { id: 24, input: 14, output: 2 },
-    { id: 25, input: 18, output: 16 }
-  ],
-  [
-    { id: 0, input: 18, output: 19 },
-    { id: 1, input: 9, output: 11 },
-    { id: 2, input: 13, output: 0 },
-    { id: 3, input: 22, output: 3 },
-    { id: 4, input: 12, output: 18 },
-    { id: 5, input: 20, output: 6 },
-    { id: 6, input: 25, output: 20 },
-    { id: 7, input: 2, output: 7 },
-    { id: 8, input: 5, output: 15 },
-    { id: 9, input: 19, output: 17 },
-    { id: 10, input: 11, output: 9 },
-    { id: 11, input: 23, output: 4 },
-    { id: 12, input: 10, output: 1 },
-    { id: 13, input: 6, output: 25 },
-    { id: 14, input: 3, output: 16 },
-    { id: 15, input: 21, output: 10 },
-    { id: 16, input: 24, output: 8 },
-    { id: 17, input: 8, output: 21 },
-    { id: 18, input: 15, output: 12 },
-    { id: 19, input: 14, output: 22 },
-    { id: 20, input: 4, output: 24 },
-    { id: 21, input: 17, output: 13 },
-    { id: 22, input: 7, output: 23 },
-    { id: 23, input: 16, output: 14 },
-    { id: 24, input: 0, output: 2 },
-    { id: 25, input: 1, output: 5 }
-  ],
-  [
-    { id: 0, input: 3, output: 25 },
-    { id: 1, input: 15, output: 17 },
-    { id: 2, input: 0, output: 12 },
-    { id: 3, input: 1, output: 22 },
-    { id: 4, input: 23, output: 11 },
-    { id: 5, input: 10, output: 15 },
-    { id: 6, input: 18, output: 2 },
-    { id: 7, input: 20, output: 16 },
-    { id: 8, input: 17, output: 24 },
-    { id: 9, input: 9, output: 8 },
-    { id: 10, input: 21, output: 19 },
-    { id: 11, input: 13, output: 4 },
-    { id: 12, input: 22, output: 9 },
-    { id: 13, input: 2, output: 20 },
-    { id: 14, input: 16, output: 5 },
-    { id: 15, input: 14, output: 10 },
-    { id: 16, input: 4, output: 23 },
-    { id: 17, input: 11, output: 6 },
-    { id: 18, input: 25, output: 0 },
-    { id: 19, input: 24, output: 18 },
-    { id: 20, input: 5, output: 7 },
-    { id: 21, input: 7, output: 1 },
-    { id: 22, input: 19, output: 14 },
-    { id: 23, input: 8, output: 21 },
-    { id: 24, input: 6, output: 3 },
-    { id: 25, input: 12, output: 13 }
-  ],
-  [
-    { id: 0, input: 5, output: 7 },
-    { id: 1, input: 2, output: 20 },
-    { id: 2, input: 7, output: 19 },
-    { id: 3, input: 9, output: 13 },
-    { id: 4, input: 17, output: 4 },
-    { id: 5, input: 21, output: 3 },
-    { id: 6, input: 13, output: 5 },
-    { id: 7, input: 16, output: 25 },
-    { id: 8, input: 8, output: 9 },
-    { id: 9, input: 15, output: 1 },
-    { id: 10, input: 25, output: 16 },
-    { id: 11, input: 18, output: 10 },
-    { id: 12, input: 24, output: 11 },
-    { id: 13, input: 14, output: 15 },
-    { id: 14, input: 23, output: 8 },
-    { id: 15, input: 22, output: 0 },
-    { id: 16, input: 3, output: 12 },
-    { id: 17, input: 12, output: 22 },
-    { id: 18, input: 6, output: 17 },
-    { id: 19, input: 11, output: 18 },
-    { id: 20, input: 4, output: 23 },
-    { id: 21, input: 10, output: 6 },
-    { id: 22, input: 1, output: 24 },
-    { id: 23, input: 0, output: 14 },
-    { id: 24, input: 19, output: 21 },
-    { id: 25, input: 20, output: 2 }
-  ]
-]
+  {
+    id: 0,
+    offset: 0,
+    wires: [
+      { input: 0, output: 2 },
+      { input: 1, output: 5 },
+      { input: 2, output: 7 },
+      { input: 3, output: 20 },
+      { input: 4, output: 19 },
+      { input: 5, output: 3 },
+      { input: 6, output: 8 },
+      { input: 7, output: 22 },
+      { input: 8, output: 15 },
+      { input: 9, output: 0 },
+      { input: 10, output: 17 },
+      { input: 11, output: 14 },
+      { input: 12, output: 4 },
+      { input: 13, output: 25 },
+      { input: 14, output: 1 },
+      { input: 15, output: 6 },
+      { input: 16, output: 10 },
+      { input: 17, output: 24 },
+      { input: 18, output: 16 },
+      { input: 19, output: 11 },
+      { input: 20, output: 18 },
+      { input: 21, output: 13 },
+      { input: 22, output: 12 },
+      { input: 23, output: 21 },
+      { input: 24, output: 23 },
+      { input: 25, output: 9 },
+    ],
+  },
+  {
+    id: 1,
+    offset: 0,
+    wires: [
+      { input: 0, output: 21 },
+      { input: 1, output: 23 },
+      { input: 2, output: 24 },
+      { input: 3, output: 25 },
+      { input: 4, output: 12 },
+      { input: 5, output: 7 },
+      { input: 6, output: 15 },
+      { input: 7, output: 6 },
+      { input: 8, output: 14 },
+      { input: 9, output: 3 },
+      { input: 10, output: 0 },
+      { input: 11, output: 16 },
+      { input: 12, output: 13 },
+      { input: 13, output: 19 },
+      { input: 14, output: 9 },
+      { input: 15, output: 5 },
+      { input: 16, output: 11 },
+      { input: 17, output: 1 },
+      { input: 18, output: 22 },
+      { input: 19, output: 17 },
+      { input: 20, output: 8 },
+      { input: 21, output: 18 },
+      { input: 22, output: 10 },
+      { input: 23, output: 20 },
+      { input: 24, output: 4 },
+      { input: 25, output: 2 },
+    ],
+  },
+  {
+    id: 2,
+    offset: 0,
+    wires: [
+      { input: 0, output: 18 },
+      { input: 1, output: 3 },
+      { input: 2, output: 5 },
+      { input: 3, output: 17 },
+      { input: 4, output: 6 },
+      { input: 5, output: 21 },
+      { input: 6, output: 10 },
+      { input: 7, output: 12 },
+      { input: 8, output: 23 },
+      { input: 9, output: 11 },
+      { input: 10, output: 15 },
+      { input: 11, output: 22 },
+      { input: 12, output: 13 },
+      { input: 13, output: 2 },
+      { input: 14, output: 7 },
+      { input: 15, output: 14 },
+      { input: 16, output: 8 },
+      { input: 17, output: 0 },
+      { input: 18, output: 16 },
+      { input: 19, output: 4 },
+      { input: 20, output: 1 },
+      { input: 21, output: 19 },
+      { input: 22, output: 9 },
+      { input: 23, output: 20 },
+      { input: 24, output: 25 },
+      { input: 25, output: 24 },
+    ],
+  },
+  {
+    id: 3,
+    offset: 0,
+    wires: [
+      { input: 0, output: 2 },
+      { input: 1, output: 3 },
+      { input: 2, output: 23 },
+      { input: 3, output: 17 },
+      { input: 4, output: 7 },
+      { input: 5, output: 11 },
+      { input: 6, output: 14 },
+      { input: 7, output: 6 },
+      { input: 8, output: 15 },
+      { input: 9, output: 13 },
+      { input: 10, output: 21 },
+      { input: 11, output: 22 },
+      { input: 12, output: 25 },
+      { input: 13, output: 16 },
+      { input: 14, output: 0 },
+      { input: 15, output: 18 },
+      { input: 16, output: 9 },
+      { input: 17, output: 12 },
+      { input: 18, output: 20 },
+      { input: 19, output: 10 },
+      { input: 20, output: 24 },
+      { input: 21, output: 19 },
+      { input: 22, output: 4 },
+      { input: 23, output: 5 },
+      { input: 24, output: 1 },
+      { input: 25, output: 8 },
+    ],
+  },
+  {
+    id: 4,
+    offset: 0,
+    wires: [
+      { input: 0, output: 7 },
+      { input: 1, output: 21 },
+      { input: 2, output: 25 },
+      { input: 3, output: 0 },
+      { input: 4, output: 17 },
+      { input: 5, output: 16 },
+      { input: 6, output: 20 },
+      { input: 7, output: 22 },
+      { input: 8, output: 4 },
+      { input: 9, output: 19 },
+      { input: 10, output: 2 },
+      { input: 11, output: 14 },
+      { input: 12, output: 11 },
+      { input: 13, output: 24 },
+      { input: 14, output: 18 },
+      { input: 15, output: 10 },
+      { input: 16, output: 15 },
+      { input: 17, output: 12 },
+      { input: 18, output: 23 },
+      { input: 19, output: 3 },
+      { input: 20, output: 5 },
+      { input: 21, output: 13 },
+      { input: 22, output: 9 },
+      { input: 23, output: 1 },
+      { input: 24, output: 8 },
+      { input: 25, output: 6 },
+    ],
+  },
+];

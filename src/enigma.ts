@@ -1,5 +1,5 @@
 import { encodeChar, decodeChar } from './char-encoding';
-import { getSelectedRotors, setCypher, spin } from './rotor';
+import { connect, getSelectedRotors, setCypher, spin } from './rotor';
 
 export type EnigmaConfig = {
   initialCypher: number[];
@@ -22,24 +22,31 @@ export const getEnigma = (config: EnigmaConfig) => {
         counter++;
         logs.push(`pressed ${c}`);
 
-        // dont spin the reflector
-        for (let i = 0; i < rotors.length - 1; i++) {
-          if (i === 0 || counter % rotors[0].length ** i === 0) {
+        for (let i = 0; i < rotors.length; i++) {
+          if (i === 0 || counter % rotors[0].wires.length ** i === 0) {
             spin(rotors[i]);
             logs.push(`spun rotor ${i}`);
           }
         }
 
         for (let i = 0; i < rotors.length; i++) {
-          coded = rotors[i][(coded ?? encodeChar(c))].output
+          connect({
+            direction: 'normal',
+            location: coded ?? encodeChar(c),
+            rotor: rotors[i],
+          })
           logs.push(`rotor ${i}: ${coded}`);
         }
 
         for (let i = rotors.length - 2; i >= 0; i--) {
-          coded = rotors[i].find(wire => wire.output === coded)?.input;
+          connect({
+            direction: 'reflected',
+            location: coded!,
+            rotor: rotors[i],
+          })
           logs.push(`rotor ${i}: ${coded}`);
         }
-
+        
         res += decodeChar(coded!);
         logs.push(`illuminated ${res[res.length - 1]}`);
       }
