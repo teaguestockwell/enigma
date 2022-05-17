@@ -5,9 +5,10 @@ describe('enigma', () => {
     const enigma = getEnigma({
       initialCypher: [0, 0, 0],
       rotorOrder: [0, 1, 2],
+      variant: 'encode',
     });
-    const res0 = enigma.code('a');
-    const res1 = enigma.code('a');
+    const res0 = enigma.write('a');
+    const res1 = enigma.write('a');
     expect(res0).not.toBe(res1);
   });
 
@@ -15,32 +16,36 @@ describe('enigma', () => {
     const enigma = getEnigma({
       initialCypher: [0, 0, 0],
       rotorOrder: [0, 1, 2],
+      variant: 'encode',
     });
-    expect(enigma.code('abc')).not.toBe('abc');
+    expect(enigma.write('abc')).not.toBe('abc');
   });
 
   it('encodes and decodes 1 char', () => {
-    const config = {
+    const base = {
       initialCypher: [0, 0, 0, 0, 0],
       rotorOrder: [0, 1, 2, 3, 4],
     };
     const text = 'a';
-    const encoded = getEnigma(config).code(text);
-    const decoded = getEnigma(config).code(encoded);
 
-    expect(text).toBe(decoded);
+    const encoded = getEnigma({ ...base, variant: 'encode' }).write(text);
+    const decoded = getEnigma({ ...base, variant: 'decode' }).write(encoded);
+
+    expect(encoded).not.toBe(text);
+    expect(decoded).toBe(text);
   });
 
   it('encodes and decodes many chars', () => {
-    const config = {
+    const base = {
       initialCypher: [0, 0, 0, 0, 0],
       rotorOrder: [0, 1, 2, 3, 4],
     };
-    const encoder = getEnigma(config);
-    const decoder = getEnigma(config);
+    const text = 'a'.repeat(1000);
 
-    expect(decoder.code(encoder.code('abcdefghijklmnopqrstuvwxyz'))).toBe(
-      'abcdefghijklmnopqrstuvwxyz'
-    );
+    const encoded = getEnigma({ ...base, variant: 'encode' }).write(text);
+    const decoded = getEnigma({ ...base, variant: 'decode' }).write(encoded);
+
+    expect(encoded).not.toBe(text);
+    expect(decoded).toBe(text);
   });
 });

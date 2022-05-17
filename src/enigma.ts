@@ -4,57 +4,83 @@ import { connect, getSelectedRotors, setCypher, spin } from './rotor';
 export type EnigmaConfig = {
   initialCypher: number[];
   rotorOrder: number[];
-  verbose?: boolean;
+  variant: 'encode' | 'decode';
+  logger?: (...args: any[]) => unknown;
 };
 
 export const getEnigma = (config: EnigmaConfig) => {
-  const rotors = getSelectedRotors(config.rotorOrder);
-  setCypher(rotors, config.initialCypher);
+  const { initialCypher, rotorOrder, variant, logger } = config;
+  const rotors = getSelectedRotors(rotorOrder);
+  setCypher(rotors, initialCypher);
   let counter = 0;
-  const logs: any[] = [];
 
   const e = {
-    code: (s: string) => {
+    write: (s: string) => {
       let res = '';
 
       for (const c of s) {
-        let coded: undefined | number;
-        counter++;
-        logs.push(`pressed ${c}`);
+        let location = encodeChar(c);
+        logger?.(`pressed ${c}`);
+        logger?.(`${c} => ${location}`);
 
-        for (let i = 0; i < rotors.length; i++) {
+        counter++;
+        for (let i = 0; i < rotors.length - 1; i++) {
           if (i === 0 || counter % rotors[0].wires.length ** i === 0) {
+            const prev = rotors[i].offset;
             spin(rotors[i]);
-            logs.push(`spun rotor ${i}`);
+            logger?.(
+              `spun rotor #${rotors[i].id} at pos ${i} from ${prev} to ${rotors[i].offset}`
+            );
           }
         }
 
-        for (let i = 0; i < rotors.length; i++) {
-          coded = connect({
+        for (let i = 0; i < rotors.length - 1; i++) {
+          const prev = location;
+          location = connect({
             direction: 'normal',
-            location: coded ?? encodeChar(c),
+            location,
             rotor: rotors[i],
-          })
-          logs.push(`rotor ${i}: ${coded}`);
+          });
+          logger?.(
+            `rotor #${rotors[i].id} at pos ${i} ${decodeChar(
+              prev
+            )} => ${decodeChar(location)}`
+          );
         }
+
+        const prev = location;
+        location = connect({
+          direction: variant === 'encode' ? 'normal' : 'reflected',
+          location,
+          rotor: rotors[rotors.length - 1],
+        });
+        logger?.(
+          `reflector rotor #${
+            rotors[rotors.length - 1].id
+          } at pos ${rotors.length - 1} ${decodeChar(prev)} => ${decodeChar(
+            location
+          )}`
+        );
 
         for (let i = rotors.length - 2; i >= 0; i--) {
-          coded = connect({
+          const prev = location;
+          location = connect({
             direction: 'reflected',
-            location: coded!,
+            location,
             rotor: rotors[i],
-          })
-          logs.push(`rotor ${i}: ${coded}`);
+          });
+          logger?.(
+            `rotor #${rotors[i].id} at pos ${i} ${decodeChar(
+              prev
+            )} => ${decodeChar(location)}`
+          );
         }
-        
-        res += decodeChar(coded!);
-        logs.push(`illuminated ${res[res.length - 1]}`);
+
+        res += decodeChar(location!);
+        logger?.(`illuminated ${res[res.length - 1]}`);
       }
 
-      if (config.verbose) {
-        console.log(logs.join('\n'));
-        console.log(rotors);
-      }
+      logger?.({ config });
       return res;
     },
   };

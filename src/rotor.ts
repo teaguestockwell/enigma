@@ -31,7 +31,7 @@ export const getRandomRotor = (chars = 26): Rotor => {
  * shift the rotor left
  */
 export const spin = (rotor: Rotor) => {
-  rotor.offset = rotor.offset === rotor.wires.length - 1 ? 0 : rotor.offset + 1;
+  rotor.offset = rotor.offset === rotor.wires.length - 2 ? 0 : rotor.offset + 1;
 };
 
 /**
