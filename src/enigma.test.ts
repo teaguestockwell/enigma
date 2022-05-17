@@ -23,10 +23,11 @@ it('encodes and decodes 1 char', () => {
     initialCypher: [0, 0, 0, 0, 0],
     rotorOrder: [0, 1, 2, 3, 4],
   };
-  const encoder = getEnigma(config);
-  const decoder = getEnigma(config);
+  const text = 'a'
+  const encoded = getEnigma(config).code(text);
+  const decoded = getEnigma(config).code(encoded);
 
-  expect(decoder.code(encoder.code('z'))).toBe('z');
+  expect(text).toBe(decoded);
 });
 
 it('encodes and decodes many chars', () => {

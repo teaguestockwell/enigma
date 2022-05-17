@@ -51,6 +51,16 @@ export const setCypher = (rotors: Rotor[], cypher: number[]) => {
   }
 };
 
+export const rotate = (x: number, ceiling: number, floor: number): number => {
+  if (x > ceiling) {
+      return x - ceiling - 1
+  }
+  if (x < floor){
+      return ceiling - Math.abs(x) + 1
+  }
+  return x
+}
+
 export type ConnectOptions = {
   direction: 'normal' | 'reflected';
   location: number;
@@ -63,33 +73,16 @@ export const connect = (options: ConnectOptions) => {
     location,
     rotor: { offset, wires },
   } = options;
-
-  for (const w of wires) {
-    const { input, output } = w;
-    if (
-      input < 0 ||
-      input >= wires.length ||
-      output < 0 ||
-      output >= wires.length
-    ) {
-      // console.log('invalid wire', w);
-    }
-  }
+  const ceiling = wires.length - 1;
+  const floor = 0;
 
   if (direction === 'normal') {
-    return wires.find(w => {
-      const sum = location + offset;
-      const tar = Math.abs(
-        sum >= wires.length - 1 ? (sum % wires.length) - 1 : sum
-      );
-      return tar === w.input;
-    })!.output;
+    const shifted = rotate(location + offset, ceiling, floor);
+    return wires.find(w => shifted === w.input)!.output;
   }
 
-  const unShifted =
-    wires.find(w => w.output === location)!.input - offset + 1;
-  const shifted = unShifted < 0 ? unShifted + wires.length : unShifted;
-  return shifted;
+  const unShifted = wires.find(w => w.output === location)!.input
+  return rotate(unShifted - offset, ceiling, floor)
 };
 
 /**
