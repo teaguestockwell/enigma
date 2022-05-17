@@ -1,6 +1,8 @@
 {
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "MIT",
+  "repository": "https://github.com/teaguestockwell/enigma",
+  "description": "",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
@@ -8,16 +10,14 @@
     "src"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=14"
   },
   "scripts": {
-    "start": "tsdx watch",
     "build": "tsdx build",
     "test": "tsdx test",
     "lint": "tsdx lint",
     "prepare": "tsdx build",
-    "size": "size-limit",
-    "analyze": "size-limit --why"
+    "size": "size-limit"
   },
   "peerDependencies": {},
   "husky": {
@@ -32,7 +32,7 @@
     "trailingComma": "es5"
   },
   "name": "enigma",
-  "author": "teagueStockwell",
+  "author": "teague stockwell",
   "module": "dist/enigma.esm.js",
   "size-limit": [
     {

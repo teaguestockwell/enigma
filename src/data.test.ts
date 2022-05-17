@@ -1,4 +1,4 @@
-import { getRandomRotor, getRotors} from './data';
+import { getRandomRotor, getRotors } from './data';
 
 it('makes valid rotors', () => {
   const r = getRandomRotor(26);
@@ -18,11 +18,11 @@ it('makes valid rotors', () => {
     seenInputs.add(wire.input);
     seenOutputs.add(wire.output);
   }
-  
-  // new Array(5).fill(0).forEach(() => {
-  //   const r = getRandomRotor(26);
-  //   console.log(r)
-  // })
+
+  new Array(5).fill(0).forEach(() => {
+    const r = getRandomRotor(26);
+    console.log(r);
+  });
 });
 
 it('has valid rotors', () => {
@@ -31,6 +31,6 @@ it('has valid rotors', () => {
   rotors.forEach(r => {
     expect(ids.has(r.id)).toBe(false);
     ids.add(r.id);
-  })
+  });
   expect(ids.size).toBe(rotors.length);
-})
+});
