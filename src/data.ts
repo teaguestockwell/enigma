@@ -1,7 +1,10 @@
-type Wire = { input: number; output: number };
+import { Rotor } from "./enigma";
 
-export type Rotor = { wires: Wire[]; offset: number; id: number };
-
+/**
+ * 
+ * @param chars the length all the characters in the rotor
+ * @example 26 = abcdefghijklmnopqrstuvwxyz 
+ */
 export const getRandomRotor = (chars = 26): Rotor => {
   const outputs = Array.from({ length: 26 }, (_, i) => i);
   const rotor: Rotor = {
@@ -28,74 +31,8 @@ export const getRandomRotor = (chars = 26): Rotor => {
 };
 
 /**
- * shift the rotor left
+ * static rotor data
  */
-export const spin = (rotor: Rotor) => {
-  rotor.offset = rotor.offset === rotor.wires.length - 2 ? 0 : rotor.offset + 1;
-};
-
-/**
- * spin the rotor to set a char of the cypher
- */
-export const seek = (tar: number, rotor: Rotor) => {
-  rotor.offset = tar;
-};
-
-export const setCypher = (rotors: Rotor[], cypher: number[]) => {
-  if (rotors.length !== cypher.length) {
-    throw new Error('cypher length must match rotors');
-  }
-
-  for (let i = 0; i < cypher.length; i++) {
-    seek(cypher[i], rotors[i]);
-  }
-};
-
-export const rotate = (x: number, ceiling: number, floor: number): number => {
-  if (x > ceiling) {
-      return x - ceiling - 1
-  }
-  if (x < floor){
-      return ceiling - Math.abs(x) + 1
-  }
-  return x
-}
-
-export type ConnectOptions = {
-  direction: 'normal' | 'reflected';
-  location: number;
-  rotor: Rotor;
-};
-
-export const connect = (options: ConnectOptions) => {
-  const {
-    direction,
-    location,
-    rotor: { offset, wires },
-  } = options;
-  const ceiling = wires.length - 1;
-  const floor = 0;
-
-  if (direction === 'normal') {
-    const shifted = rotate(location + offset, ceiling, floor);
-    return wires.find(w => shifted === w.input)!.output;
-  }
-
-  const unShifted = wires.find(w => w.output === location)!.input
-  return rotate(unShifted - offset, ceiling, floor)
-};
-
-/**
- * the operator may choose from pre made rotors
- */
-export const getSelectedRotors = (rotorOrder: number[]) => {
-  const allRotors = getRotors();
-  return rotorOrder.reduce((acc, cur) => {
-    acc.push(allRotors[cur]);
-    return acc;
-  }, [] as Rotor[]);
-};
-
 export const getRotors = (): Rotor[] => [
   {
     id: 0,
