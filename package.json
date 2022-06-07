@@ -1,8 +1,20 @@
 {
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
-  "repository": "https://github.com/teaguestockwell/enigma-replica",
-  "description": "a simulation of an enigma machine that uses an incremental stepping chain of substitution rotors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/teaguestockwell/enigma-replica"
+  },
+  "bugs": {
+    "url": "https://github.com/teaguestockwell/enigma-replica/issues"
+  },
+  "homepage": "https://github.com/teaguestockwell/enigma-replica",
+  "author": {
+    "name": "Teague Stockwell",
+    "email": "tsappdevelopment@gmail.com",
+    "url": "https://teaguestockwell.com"
+  },
+  "description": "A simulation of an enigma machine that uses an incremental stepping chain of substitution rotors",
   "keywords": [
     "enigma",
     "alen turing",
@@ -39,7 +51,6 @@
     "trailingComma": "es5"
   },
   "name": "enigma-replica",
-  "author": "teague stockwell",
   "module": "dist/enigma.esm.js",
   "size-limit": [
     {
